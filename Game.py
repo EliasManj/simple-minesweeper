@@ -1,4 +1,5 @@
 from Board import Board
+import os
 
 class Game:
 
@@ -20,6 +21,8 @@ class Game:
             return self.game_menu()
         elif self.state == Game.GAME:
             return self.main_game()
+        elif self.state == Game.NEW_GAME:
+            return self.new_game()
         elif self.state == Game.GAME_END:
             return self.end_game()
 
@@ -38,6 +41,7 @@ class Game:
             return True
 
     def new_game(self):
+        self.clear_screen()
         print("Choose dificulty")
         print("-easy (4x4)")
         print("-medium (9x9)")
@@ -45,10 +49,14 @@ class Game:
         user_input = input(">>").strip().lower()
         if user_input == "easy":
             self.board = Board(bombs=10, rows = 4, cols = 4)
+            self.state = Game.GAME
         elif user_input == "medium":
             self.board = Board(bombs=10, rows = 9, cols = 9)
+            self.state = Game.GAME
         elif user_input == "hard":
             self.board = Board(bombs=10, rows = 16, cols = 16)
+            self.state = Game.GAME
+        return True
 
     def exit_game(self):
         pass

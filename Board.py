@@ -37,16 +37,77 @@ class Board:
         for row in range(0,self.n_rows):
             for col in range(0,self.n_cols):
                 self.board[row][col] = Cell(value=self.board[row][col], x=row, y=col)
-        self.print_board_debug()
+        self.fill_cells()
 
     def fill_cells(self):
         for row in range(0,self.n_rows):
             for col in range(0,self.n_cols):
-                if not self.board[row][col].is_bomb(): 
+                if not self.board[row][col].is_bomb():
+                    print("count {},{}".format(row, col)) 
                     self.count_bombs(self.board[row][col])
+
+    def get_cell_value(self, x, y):
+        return self.board[x][y].value
+
+    def get_cell_list(self, positions):
+        return [self.get_cell_value(x,y) for x,y in positions]
+
 
     def count_bombs(self, cell):
         assert cell.value != Cell.BOMB_VALUE
+        row = cell.x
+        col = cell.y
+        if self.is_top_border_cell(cell) and self.is_right_border_cell(cell):
+            adjacent_cells = self.get_cell_list([(row-1,col),(row-1, col+1),(row, col+1)])
+        elif self.is_top_border_cell(cell) and self.is_left_border_cell(cell):
+            adjacent_cells = self.get_cell_list([(row+1,col),(row+1, col+1),(row, col+1)])
+        elif self.is_bottom_border_cell(cell) and self.is_left_border_cell(cell):
+            adjacent_cells = self.get_cell_list([(row,col-1),(row+1, col-1),(row+1, col)])
+        elif self.is_bottom_border_cell(cell) and self.is_right_border_cell(cell):
+            adjacent_cells = self.get_cell_list([(row-1, col-1),(row-1, col),(row, col-1)])
+        elif(self.is_border_cell(cell)):    
+            if self.is_top_border_cell(cell):
+                adjacent_cells = self.get_cell_list([(row-1, col),(row-1, col+1),(row, col+1),(row+1, col+1),(row+1, col)])          
+            elif self.is_bottom_border_cell(cell):
+                adjacent_cells = self.get_cell_list([(row-1, col),(row-1, col-1),(row, col-1),(row+1, col-1),(row+1, col)])
+            elif self.is_right_border_cell(cell):
+                adjacent_cells = self.get_cell_list([(row, col-1),(row-1, col-1),(row-1, col+1),(row-1, col),(row, col+1)])
+            elif self.is_left_border_cell(cell):
+                adjacent_cells = self.get_cell_list([(row, col-1), (row+1, col-1), (row+1, col), (row+1, col+1), (row, col+1)])
+        else:
+            adjacent_cells = self.cell_get_neighbors(cell)
+        cell.value = adjacent_cells.count(Cell.BOMB_VALUE)
+
+    def cell_get_neighbors(self, cell):
+        neightbors = self.cell_get_bottom(cell)+self.cell_get_top(cell)+[self.board[cell.x-1][cell.y].value, self.board[cell.x+1][cell.y].value]
+        return neightbors
+
+    def is_top_border_cell(self, cell):
+        return cell.y == 0
+
+    def is_bottom_border_cell(self, cell):
+        return cell.y >= self.n_rows - 1
+    
+    def is_right_border_cell(self, cell):
+        return cell.x >= self.n_cols - 1
+    
+    def is_left_border_cell(self, cell):
+        return cell.x == 0
+
+    def is_border_cell(self, cell):
+        return self.is_bottom_border_cell(cell) or self.is_top_border_cell(cell) or self.is_left_border_cell(cell) or self.is_right_border_cell(cell)
+
+    def cell_get_top(self, cell):
+        return [self.board[cell.x-1][cell.y-1].value, self.board[cell.x][cell.y-1].value, self.board[cell.x+1][cell.y-1].value]
+
+    def cell_get_bottom(self, cell):
+        return [self.board[cell.x-1][cell.y+1].value, self.board[cell.x][cell.y+1].value, self.board[cell.x+1][cell.y+1].value]
+    
+    def cell_get_right(self, cell):
+        return [self.board[cell.x+1][cell.y-1].value, self.board[cell.x+1][cell.y].value, self.board[cell.x+1][cell.y+1].value]
+
+    def cell_get_left(self, cell):
+        return [self.board[cell.x-1][cell.y-1].value, self.board[cell.x-1][cell.y].value, self.board[cell.x-1][cell.y+1].value]
         
     def print_board_debug(self):
         for row in self.board:

@@ -13,12 +13,31 @@ class Cell:
         self.x = x 
         self.y = y
         self.flagged = False
+        self.show_value = '-'
 
     def is_bomb(self):
         return self.value == Cell.BOMB_VALUE
 
     def print_cell_debug(self):
         return str(self.value)
+
+    def print_cell_show_bomb(self):
+        if self.is_bomb():
+            return str(self.value)
+        else:
+            return str(self.show_value)
+
+    def mine(self):
+        if self.is_bomb():
+            return False
+        else:
+            self.reveal()
+        return True
+
+    def reveal(self):
+        if not self.revealed:
+            self.show_value = self.value
+            
 
 class Board:
 
@@ -43,7 +62,6 @@ class Board:
         for row in range(0,self.n_rows):
             for col in range(0,self.n_cols):
                 if not self.board[row][col].is_bomb():
-                    print("count {},{}".format(row, col)) 
                     self.count_bombs(self.board[row][col])
 
     def get_cell_value(self, x, y):
@@ -79,8 +97,8 @@ class Board:
         cell.value = adjacent_cells.count(Cell.BOMB_VALUE)
 
     def cell_get_neighbors(self, cell):
-        neightbors = self.cell_get_bottom(cell)+self.cell_get_top(cell)+[self.board[cell.x-1][cell.y].value, self.board[cell.x+1][cell.y].value]
-        return neightbors
+        neighbors = self.cell_get_bottom(cell)+self.cell_get_top(cell)+self.get_cell_list([(cell.x-1, cell.y),(cell.x+1, cell.y)])
+        return neighbors
 
     def is_top_border_cell(self, cell):
         return cell.y == 0
@@ -109,8 +127,13 @@ class Board:
     def cell_get_left(self, cell):
         return [self.board[cell.x-1][cell.y-1].value, self.board[cell.x-1][cell.y].value, self.board[cell.x-1][cell.y+1].value]
         
+    def mine_cell(self, x, y):
+        return self.board[x][y].mine()
+
     def print_board_debug(self):
         for row in self.board:
             print(list(map(lambda x: x.print_cell_debug(), row)))
 
-    
+    def print_board_show_bombs_only(self):
+        for row in self.board:
+            print(list(map(lambda x: x.print_cell_show_bomb(), row)))
